@@ -14,6 +14,10 @@ namespace Jhu.Graywulf.Keystone
     /// </summary>
     /// <remarks>
     /// https://github.com/openstack/identity-api/blob/master/v3/src/markdown/identity-api-v3.md
+    ///
+    /// Trusts can only be made by trustors, consequently the Keystone API
+    /// expects a token identifying the trustor and not that of the admin.
+    /// Always set the UserAuthToken property before calling this function.
     /// </remarks>
     public class KeystoneClient : RestClient
     {
@@ -197,7 +201,7 @@ namespace Jhu.Graywulf.Keystone
             return res.Body.Roles;
         }
 
-        public Role[] ListRole(string domainID)
+        public Role[] ListRoles(string domainID)
         {
             var res = SendRequest<RoleListResponse>(
                 HttpMethod.Get, String.Format("/v3/domains/{0}/roles", domainID), adminAuthToken);
@@ -207,6 +211,45 @@ namespace Jhu.Graywulf.Keystone
 
         #endregion
         #region Group manipulation
+
+        public Group Create(Group group)
+        {
+            var req = GroupRequest.CreateMessage(group);
+            var res = SendRequest<GroupRequest, GroupResponse>(
+                HttpMethod.Post, "/v3/groups", req, adminAuthToken);
+
+            return res.Body.Group;
+        }
+
+        public Group Update(Group group)
+        {
+            var req = GroupRequest.CreateMessage(group);
+            var res = SendRequest<GroupRequest, GroupResponse>(
+                HttpMethod.Patch, String.Format("/v3/groups/{0}", group.ID), req, adminAuthToken);
+
+            return res.Body.Group;
+        }
+
+        public void Delete(Group group)
+        {
+            SendRequest(HttpMethod.Delete, String.Format("/v3/groups/{0}", group.ID), adminAuthToken);
+        }
+
+        public Group GetGroup(string id)
+        {
+            var res = SendRequest<GroupResponse>(
+                HttpMethod.Get, String.Format("/v3/groups/{0}", id), adminAuthToken);
+
+            return res.Body.Group;
+        }
+
+        public Group[] ListGroups()
+        {
+            var res = SendRequest<GroupListResponse>(
+                HttpMethod.Get, "/v3/groups", adminAuthToken);
+
+            return res.Body.Groups;
+        }
 
         #endregion
         #region User manipulation
@@ -273,6 +316,16 @@ namespace Jhu.Graywulf.Keystone
             return res.Body.Users;
         }
 
+        public User[] ListUsers(Group group)
+        {
+            var res = SendRequest<UserListResponse>(
+                HttpMethod.Get,
+                String.Format("/v3/groups/{0}/users", group.ID),
+                adminAuthToken);
+
+            return res.Body.Users;
+        }
+
         public User[] FindUsers(string name, bool enabledOnly, bool caseInsensitive)
         {
             var query = BuildSearchQueryString(name, enabledOnly, caseInsensitive);
@@ -280,6 +333,30 @@ namespace Jhu.Graywulf.Keystone
                 HttpMethod.Get, "/v3/users" + query, adminAuthToken);
 
             return res.Body.Users;
+        }
+
+        public void AddToGroup(User user, Group group)
+        {
+            SendRequest(
+                HttpMethod.Put,
+                String.Format("/v3/groups/{0}/users/{1} ", group.ID, user.ID),
+                adminAuthToken);
+        }
+
+        public void RemoveFromGroup(User user, Group group)
+        {
+            SendRequest(
+                HttpMethod.Delete,
+                String.Format("/v3/groups/{0}/users/{1} ", group.ID, user.ID),
+                adminAuthToken);
+        }
+
+        public void CheckGroup(User user, Group group)
+        {
+            SendRequest(
+                HttpMethod.Head,
+                String.Format("/v3/groups/{0}/users/{1} ", group.ID, user.ID),
+                adminAuthToken);
         }
 
         public void GrantRole(Domain domain, User user, Role role)
@@ -418,6 +495,15 @@ namespace Jhu.Graywulf.Keystone
         #endregion
         #region Trusts
 
+        /// <summary>
+        /// Creates a new trust.
+        /// </summary>
+        /// <param name="trust"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
         public Trust Create(Trust trust)
         {
             var req = TrustRequest.CreateMessage(trust);
@@ -427,26 +513,139 @@ namespace Jhu.Graywulf.Keystone
             return res.Body.Trust;
         }
 
-        public void Delete(Trust trust)
+        /// <summary>
+        /// Creates a new trust.
+        /// </summary>
+        /// <param name="trustorToken"></param>
+        /// <param name="trustee"></param>
+        /// <param name="project"></param>
+        /// <param name="role"></param>
+        /// <param name="expiresAt"></param>
+        /// <param name="uses"></param>
+        /// <param name="impersonate"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public Trust Create(User trustee, Project project, Role role, DateTime expiresAt, int uses, bool impersonate)
         {
-            // TODO: 
-            throw new NotImplementedException();
+            // Get user based on trustor token and use
+            // the token to create new trust
+            var trustor = GetUser(userAuthToken);
+
+            var trust = new Trust()
+            {
+                ExpiresAt = expiresAt.ToUniversalTime(),
+                Impersonation = impersonate,
+                TrustorUserID = trustor.ID,
+                TrusteeUserID = trustee.ID,
+                RemainingUses = uses,
+                ProjectID = project.ID,
+                Roles = new[] { role }
+            };
+
+            return Create(trust);
         }
 
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public void Delete(Trust trust)
+        {
+            SendRequest(
+                HttpMethod.Delete,
+                String.Format("/v3/OS-TRUST/trusts/{0}", trust.ID),
+                userAuthToken);
+        }
+
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
         public Trust GetTrust(string id)
         {
-            // TODO: 
-            throw new NotImplementedException();
+            var res = SendRequest<TrustResponse>(
+                HttpMethod.Get,
+                String.Format("/v3/OS-TRUST/trusts/{0}", id),
+                userAuthToken);
+
+            return res.Body.Trust;
         }
 
         public Trust[] ListTrusts()
         {
-            // TODO: 
-            throw new NotImplementedException();
+            var res = SendRequest<TrustListResponse>(
+                HttpMethod.Get, "/v3/OS-TRUST/trusts", adminAuthToken);
+
+            return res.Body.Trusts;
         }
 
-        // role delegate by task
-        // get role delegated by task
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public Trust[] ListTrusts(User trustor)
+        {
+            var res = SendRequest<TrustListResponse>(
+                HttpMethod.Get,
+                String.Format("/v3/OS-TRUST/trusts?trustor_user_id={0}", trustor.ID),
+                userAuthToken);
+
+            return res.Body.Trusts;
+        }
+
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public Role[] ListRoles(Trust trust)
+        {
+            var res = SendRequest<RoleListResponse>(
+                HttpMethod.Get,
+                String.Format("/v3/OS-TRUST/trusts/{0}/roles", trust.ID),
+                userAuthToken);
+
+            return res.Body.Roles;
+        }
+
+        /// <summary>
+        /// Checks if the given role is delegated by the trust.
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="user"></param>
+        /// <param name="role"></param>
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public void CheckRole(Trust trust, Role role)
+        {
+            SendRequest(
+                HttpMethod.Head,
+                String.Format("/v3/OS-TRUST/trusts/{0}/roles/{1}", trust.ID, role.ID),
+                userAuthToken);
+        }
+
+        /// <summary>
+        /// Returns the role delegated by the trust
+        /// </summary>
+        /// <param name="trust"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This function requires the UserAuthToken property set to a valid
+        /// token of the trustor.
+        /// </remarks>
+        public Role GetRole(Trust trust, Role role)
+        {
+            var res = SendRequest<RoleResponse>(
+                HttpMethod.Get,
+                String.Format("/v3/OS-TRUST/trusts/{0}/roles/{1}", trust.ID, role.ID),
+                userAuthToken);
+
+            return res.Body.Role;
+        }
 
         #endregion
         #region Specialized request functions

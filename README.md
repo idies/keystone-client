@@ -3,10 +3,7 @@ keystone-client
 
 A .Net client to the OpenStack Keystone REST interface.
 
-
-
-
-Installing the test environment:
+**Installing the test environment:**
 
 The Keystone client requires a fully funtional Keystone server for testing. The best practice is to install it on a virtual server running some flavour of linux. Below is a walkthrough of installing Keystone on ubuntu.
 
@@ -58,3 +55,7 @@ The Keystone client requires a fully funtional Keystone server for testing. The 
 
 For more information, see:
 * http://www.ubuntu.com/sites/www.ubuntu.com/files/active/Ubuntu_Keystone_WP_WEB_AW.pdf
+
+**About trusts**
+
+Trusts can only be made by trustors, consequently the Keystone API expects a token identifying the trustor and not that of the admin. Always set the UserAuthToken property before calling functions related to trusts.

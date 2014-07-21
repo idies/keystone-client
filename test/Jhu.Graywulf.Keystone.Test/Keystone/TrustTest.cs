@@ -10,7 +10,7 @@ namespace Jhu.Graywulf.Keystone
     public class TrustTest : KeystoneTestBase
     {
         [TestMethod]
-        public void CreateTrustTest()
+        public void ManipulateTrustTest()
         {
             // Purge test users
             PurgeTestEntities();
@@ -20,23 +20,23 @@ namespace Jhu.Graywulf.Keystone
             var project = CreateTestProject();
 
             // Create new users
-            var user1 = CreateTestUser("test1");
-            var user2 = CreateTestUser("test2");
+            var trustor = CreateTestUser("test_trustor");
+            var trustee = CreateTestUser("test_trustee");
 
             // Associate users with project via the role
-            Client.GrantRole(project, user1, role);
-            Client.GrantRole(project, user2, role);
+            Client.GrantRole(project, trustor, role);
+            Client.GrantRole(project, trustee, role);
 
             // Create token for user1
-            var token1 = Client.Authenticate("default", "test1", "alma");
+            var token1 = Client.Authenticate("default", "test_trustor", "alma");
 
             // Make user1 trust user2
             var trust = new Trust()
             {
                 ExpiresAt = DateTime.Now.AddDays(2).ToUniversalTime(),
                 Impersonation = true,
-                TrustorUserID = user1.ID,
-                TrusteeUserID = user2.ID,
+                TrustorUserID = trustor.ID,
+                TrusteeUserID = trustee.ID,
                 RemainingUses = 5,
                 ProjectID = project.ID,
                 Roles = new [] { role }
@@ -46,10 +46,35 @@ namespace Jhu.Graywulf.Keystone
             trust = Client.Create(trust);
 
             // Try to impersonate user with trust
-            var token2 = Client.Authenticate("default", "test2", "alma");
+            var token2 = Client.Authenticate("default", "test_trustee", "alma");
 
             var token3 = Client.Authenticate(token2, trust);
 
+            // Try to get the trust by ID
+            trust = Client.GetTrust(trust.ID);
+
+            // List all trusts
+            var trusts = Client.ListTrusts();
+            Assert.IsTrue(trusts.Length > 0);
+
+            // List trusts of the trustor
+            trusts = Client.ListTrusts(trustor);
+            Assert.AreEqual(1, trusts.Length);
+
+            // List roles of the trust
+            var roles = Client.ListRoles(trust);
+            Assert.AreEqual(1, roles.Length);
+
+            // Check if role is delegated by the trust
+            Client.CheckRole(trust, role);
+
+            // Get the role delegated by the trust
+            role = Client.GetRole(trust, role);
+
+            // Delete trust
+            Client.Delete(trust);
+
+            PurgeTestEntities();            
         }
     }
 }

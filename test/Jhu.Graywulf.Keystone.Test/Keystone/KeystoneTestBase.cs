@@ -54,6 +54,15 @@ namespace Jhu.Graywulf.Keystone
                 }
             }
 
+            var groups = Client.ListGroups();
+            for (int i = 0; i < groups.Length; i++)
+            {
+                if (groups[i].Name.StartsWith("test"))
+                {
+                    Client.Delete(groups[i]);
+                }
+            }
+
             var users = Client.FindUsers("test*", false, false);
             for (int i = 0; i < users.Length; i++)
             {
@@ -92,6 +101,17 @@ namespace Jhu.Graywulf.Keystone
             };
 
             return Client.Create(role);
+        }
+
+        protected Group CreateTestGroup()
+        {
+            var group = new Group()
+            {
+                Name = "test_group",
+                Description = "test group",
+            };
+
+            return Client.Create(group);
         }
 
         protected User CreateTestUser(string name)

@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 namespace Jhu.Graywulf.Keystone
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Group : Entity
+    internal class GroupResponse
     {
-        [JsonProperty("domain_id")]
-        public string DomainID { get; set; }
+        [JsonProperty("group")]
+        public Group Group { get; set; }
     }
 }
