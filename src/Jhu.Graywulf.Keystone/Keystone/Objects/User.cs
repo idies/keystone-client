@@ -19,7 +19,7 @@ namespace Jhu.Graywulf.Keystone
         public Domain Domain { get; set; }
 
         [JsonProperty("email")]
-        public Domain Email { get; set; }
+        public string Email { get; set; }
 
         [JsonProperty("password")]
         public string Password { get; set; }

@@ -57,15 +57,15 @@ namespace Jhu.Graywulf.Keystone
             CreateTestUser("test2");
 
             // Exact match should not return anything
-            var users = Client.FindUsers("test", false, false);
+            var users = Client.FindUsers(null, "test", false, false);
             Assert.AreEqual(0, users.Length);
 
             // Wildcard match returns the test user
-            users = Client.FindUsers("test*", false, false);
+            users = Client.FindUsers(null, "test*", false, false);
             Assert.AreEqual(2, users.Length);
 
             // Exact match returns the single test user
-            users = Client.FindUsers("test2", false, false);
+            users = Client.FindUsers(null, "test2", false, false);
             Assert.AreEqual(1, users.Length);
 
             // List all users

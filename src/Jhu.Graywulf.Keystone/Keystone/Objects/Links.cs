@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Jhu.Graywulf.Keystone
 {
     [JsonObject(MemberSerialization.OptIn)]
-    internal class Links
+    public class Links
     {
         [JsonProperty("self")]
         public string Self { get; set; }

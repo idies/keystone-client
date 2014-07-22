@@ -63,7 +63,7 @@ namespace Jhu.Graywulf.Keystone
                 }
             }
 
-            var users = Client.FindUsers("test*", false, false);
+            var users = Client.FindUsers(null, "test*", false, false);
             for (int i = 0; i < users.Length; i++)
             {
                 Client.Delete(users[i]);

@@ -277,7 +277,20 @@ namespace Jhu.Graywulf.Keystone
             SendRequest(HttpMethod.Delete, String.Format("/v3/users/{0}", user.ID), adminAuthToken);
         }
 
-        public void ChangePassword(string id, string oldPassword, string newPassword)
+        public void ResetPassword(string userID, string newPassword)
+        {
+            var user = new User()
+            {
+                Password = newPassword
+            };
+
+            var req = UserRequest.CreateMessage(user);
+
+            SendRequest<UserRequest>(
+                HttpMethod.Patch, String.Format("/v3/users/{0}", userID), req, adminAuthToken);
+        }
+
+        public void ChangePassword(string userID, string oldPassword, string newPassword)
         {
             var user = new User()
             {
@@ -288,7 +301,7 @@ namespace Jhu.Graywulf.Keystone
             var req = UserRequest.CreateMessage(user);
 
             SendRequest<UserRequest>(
-                HttpMethod.Post, String.Format("/v3/users/{0}/password", id), req, adminAuthToken);
+                HttpMethod.Post, String.Format("/v3/users/{0}/password", userID), req, adminAuthToken);
         }
 
         public User GetUser(string id)
@@ -326,9 +339,9 @@ namespace Jhu.Graywulf.Keystone
             return res.Body.Users;
         }
 
-        public User[] FindUsers(string name, bool enabledOnly, bool caseInsensitive)
+        public User[] FindUsers(string domainID, string name, bool enabledOnly, bool caseInsensitive)
         {
-            var query = BuildSearchQueryString(name, enabledOnly, caseInsensitive);
+            var query = BuildSearchQueryString(domainID, name, enabledOnly, caseInsensitive);
             var res = SendRequest<UserListResponse>(
                 HttpMethod.Get, "/v3/users" + query, adminAuthToken);
 
@@ -650,10 +663,15 @@ namespace Jhu.Graywulf.Keystone
         #endregion
         #region Specialized request functions
 
-        private string BuildSearchQueryString(string name, bool enabledOnly, bool caseInsensitive)
+        private string BuildSearchQueryString(string domainID, string name, bool enabledOnly, bool caseInsensitive)
         {
             // Build query string
             var query = "";
+
+            if (domainID != null)
+            {
+                query += "&domain_id=" + domainID;
+            }
 
             if (name != null)
             {

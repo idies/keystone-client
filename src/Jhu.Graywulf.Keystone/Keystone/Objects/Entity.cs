@@ -22,6 +22,6 @@ namespace Jhu.Graywulf.Keystone
         public bool? Enabled { get; set; }
 
         [JsonProperty("links")]
-        internal Links Links { get; set; }
+        public Links Links { get; set; }
     }
 }
