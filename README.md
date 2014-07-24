@@ -56,6 +56,22 @@ The Keystone client requires a fully funtional Keystone server for testing. The 
    PKI (public-key infrastucture) is a mechanism to produce potentially more secure, verifiable but large tokens. UUID tokens are less secure but much easier to deal with.
    
    Change appropriate line under [token] /etc/keystone/keystone.conf to
+   
+9. Create admin role and admin user
+
+   Execute the following commands
+   
+   > keystone role-create --name admin
+   > keystone tenant-create --name admin
+   > keystone user-create --name admin
+   > keystone user-role-add --user admin --role admin
+   
+   The file /etc/keystone/policy.json should by default contain the following lines:
+   
+   "admin_required": "role:admin or is_admin:1",
+   ...
+   "identity:get_user": "rule:admin_required",
+   etc.
   
 9. Build the solution and run all unit tests.
 

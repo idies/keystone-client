@@ -11,5 +11,8 @@ namespace Jhu.Graywulf.Keystone
     {
         [JsonProperty("domain_id")]
         public string DomainID { get; set; }
+
+        [JsonProperty("domain")]
+        public Domain Domain { get; set; }
     }
 }

@@ -454,7 +454,7 @@ namespace Jhu.Graywulf.Keystone
 
         private Token Authenticate(string domain, string username, string password, Domain scopeDomain, Project scopeProject)
         {
-            var req = AuthRequest.CreateMessage(domain, username, password, null, null);
+            var req = AuthRequest.CreateMessage(domain, username, password, scopeDomain, scopeProject);
             var resMessage = SendRequest<AuthRequest, AuthResponse>(
                 HttpMethod.Post, "/v3/auth/tokens", req);
 
