@@ -43,7 +43,7 @@ The Keystone client requires a fully funtional Keystone server for testing. The 
 
    > keystone-manage db_sync
   
-7. Set yup admin token
+7. Set up admin token
 
   - modify the keystone config to have a matching admin token with the one used by test routines
   - edit less /etc/keystone/keystone.conf
@@ -51,7 +51,13 @@ The Keystone client requires a fully funtional Keystone server for testing. The 
   
   admin_token=e5b19f25f5d55a995a16
   
-8. Build the solution and run all unit tests.
+8. Change token provider to UUID from PKI
+
+   PKI (public-key infrastucture) is a mechanism to produce potentially more secure, verifiable but large tokens. UUID tokens are less secure but much easier to deal with.
+   
+   Change appropriate line under [token] /etc/keystone/keystone.conf to
+  
+9. Build the solution and run all unit tests.
 
 For more information, see:
 * http://www.ubuntu.com/sites/www.ubuntu.com/files/active/Ubuntu_Keystone_WP_WEB_AW.pdf

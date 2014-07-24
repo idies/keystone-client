@@ -475,7 +475,7 @@ namespace Jhu.Graywulf.Keystone
         {
             var req = AuthRequest.CreateMessage(token, trust);
             var resMessage = SendRequest<AuthRequest, AuthResponse>(
-                HttpMethod.Post, "/v3/auth/tokens", req);
+                HttpMethod.Post, "/v3/auth/tokens", req, adminAuthToken);
 
             var authResponse = resMessage.Body;
 

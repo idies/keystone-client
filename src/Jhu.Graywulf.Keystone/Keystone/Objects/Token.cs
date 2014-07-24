@@ -25,7 +25,7 @@ namespace Jhu.Graywulf.Keystone
         public string[] Methods { get; private set; }
 
         [JsonProperty("user")]
-        public User User { get; private set; }
+        public User User { get; set; }
 
         [JsonProperty("project")]
         public Project Project { get; private set; }
