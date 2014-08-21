@@ -11,5 +11,8 @@ namespace Jhu.Graywulf.Keystone
     {
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        [JsonProperty("endpoints")]
+        public Endpoint[] Endpoints { get; private set; }
     }
 }

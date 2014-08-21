@@ -20,5 +20,8 @@ namespace Jhu.Graywulf.Keystone
 
         [JsonProperty("region_id")]
         public string RegionID { get; set; }
+
+        [JsonProperty("region")]
+        public string Region { get; set; }
     }
 }

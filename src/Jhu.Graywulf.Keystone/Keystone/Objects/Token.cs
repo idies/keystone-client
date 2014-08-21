@@ -24,6 +24,9 @@ namespace Jhu.Graywulf.Keystone
         [JsonProperty("methods")]
         public string[] Methods { get; private set; }
 
+        [JsonProperty("audit_ids")]
+        public string[] AuditIDs { get; set; }
+
         [JsonProperty("user")]
         public User User { get; set; }
 
@@ -33,8 +36,8 @@ namespace Jhu.Graywulf.Keystone
         [JsonProperty("domain")]
         public Domain Domain { get; private set; }
 
-        // TODO: add catalogs if necessary
-        // https://github.com/openstack/identity-api/blob/master/v3/src/markdown/identity-api-v3.md#tokens
+        [JsonProperty("catalog")]
+        public Service[] Catalog { get; set; }
 
         // TODO: add bind if necessary
 

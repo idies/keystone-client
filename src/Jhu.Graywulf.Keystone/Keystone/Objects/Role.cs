@@ -9,5 +9,6 @@ namespace Jhu.Graywulf.Keystone
     [JsonObject(MemberSerialization.OptIn)]
     public class Role : Entity
     {
+        // no additional parameters
     }
 }
