@@ -7,8 +7,8 @@ namespace Jhu.Graywulf.Keystone
 {
     public class KeystoneTestBase
     {
-        private Uri baseUri = new Uri("http://192.168.170.50:5000");
-        private string adminAuthToken = "e5b19f25f5d55a995a16";
+        protected const string TestPrefix = "__test__";
+
         private KeystoneClient client;
 
         protected KeystoneClient Client
@@ -17,8 +17,8 @@ namespace Jhu.Graywulf.Keystone
             {
                 if (client == null)
                 {
-                    client = new KeystoneClient(baseUri);
-                    client.AdminAuthToken = adminAuthToken;
+                    client = new KeystoneClient(new Uri(Keystone.AppSettings.Url));
+                    client.AdminAuthToken = Keystone.AppSettings.AdminToken;
                 }
 
                 return client;
@@ -27,10 +27,13 @@ namespace Jhu.Graywulf.Keystone
 
         protected void PurgeTestEntities()
         {
+            // This is a dangerour operation, never run on
+            // the live server
+
             var domains = Client.ListDomains();
             for (int i = 0; i < domains.Length; i++)
             {
-                if (domains[i].Name.StartsWith("test"))
+                if (domains[i].Name.StartsWith(TestPrefix))
                 {
                     Client.Delete(domains[i]);
                 }
@@ -39,7 +42,7 @@ namespace Jhu.Graywulf.Keystone
             var projects = Client.ListProjects();
             for (int i = 0; i < projects.Length; i++)
             {
-                if (projects[i].Name.StartsWith("test"))
+                if (projects[i].Name.StartsWith(TestPrefix))
                 {
                     Client.Delete(projects[i]);
                 }
@@ -48,7 +51,7 @@ namespace Jhu.Graywulf.Keystone
             var roles = Client.ListRoles();
             for (int i = 0; i < roles.Length; i++)
             {
-                if (roles[i].Name.StartsWith("test"))
+                if (roles[i].Name.StartsWith(TestPrefix))
                 {
                     Client.Delete(roles[i]);
                 }
@@ -57,16 +60,19 @@ namespace Jhu.Graywulf.Keystone
             var groups = Client.ListGroups();
             for (int i = 0; i < groups.Length; i++)
             {
-                if (groups[i].Name.StartsWith("test"))
+                if (groups[i].Name.StartsWith(TestPrefix))
                 {
                     Client.Delete(groups[i]);
                 }
             }
 
-            var users = Client.FindUsers(null, "test*", false, false);
+            var users = Client.FindUsers(null, TestPrefix + "*", false, false);
             for (int i = 0; i < users.Length; i++)
             {
-                Client.Delete(users[i]);
+                if (users[i].Name.StartsWith(TestPrefix))
+                {
+                    Client.Delete(users[i]);
+                }
             }
         }
 
@@ -74,7 +80,7 @@ namespace Jhu.Graywulf.Keystone
         {
             var domain = new Domain()
             {
-                Name = "test_domain",
+                Name = TestPrefix + "domain",
                 Description = "test domain"
             };
 
@@ -85,7 +91,7 @@ namespace Jhu.Graywulf.Keystone
         {
             var project = new Project()
             {
-                Name = "test_project",
+                Name = TestPrefix + "project",
                 Description = "test project",
             };
 
@@ -96,7 +102,7 @@ namespace Jhu.Graywulf.Keystone
         {
             var role = new Role()
             {
-                Name = "test_role",
+                Name = TestPrefix + "role",
                 Description = "test role",
             };
 
@@ -107,7 +113,7 @@ namespace Jhu.Graywulf.Keystone
         {
             var group = new Group()
             {
-                Name = "test_group",
+                Name = TestPrefix + "group",
                 Description = "test group",
             };
 
@@ -119,7 +125,7 @@ namespace Jhu.Graywulf.Keystone
 
             var user = new User()
             {
-                Name = name,
+                Name = TestPrefix + name,
                 Description = "test user",
                 Password = "alma",
             };

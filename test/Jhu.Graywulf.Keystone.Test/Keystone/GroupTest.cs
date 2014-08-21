@@ -16,10 +16,10 @@ namespace Jhu.Graywulf.Keystone
 
             // Create a new group and a user
             var group = CreateTestGroup();
-            var user = CreateTestUser("test");
+            var user = CreateTestUser("user");
 
             // Try to modify group
-            group.Name = "test_group2";
+            group.Name = TestPrefix + "group2";
             group = Client.Update(group);
 
             // Get group by id

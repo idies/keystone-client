@@ -665,6 +665,8 @@ namespace Jhu.Graywulf.Keystone
 
         private string BuildSearchQueryString(string domainID, string name, bool enabledOnly, bool caseInsensitive)
         {
+            // NOTE: inexact filtering works in Keystone v3.2 only!
+
             // Build query string
             var query = "";
 
@@ -728,6 +730,7 @@ namespace Jhu.Graywulf.Keystone
                 headers = new RestHeaderCollection();
             }
 
+            // Add authentication token
             headers.Set(new RestHeader(Constants.KeystoneXAuthTokenHeader, authToken));
 
             return headers;

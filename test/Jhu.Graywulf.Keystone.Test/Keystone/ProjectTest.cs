@@ -21,7 +21,7 @@ namespace Jhu.Graywulf.Keystone
             project = Client.GetProject(project.ID);
 
             // Rename it to something else
-            project.Name = "test_project2";
+            project.Name = TestPrefix + "project2";
             project = Client.Update(project);
 
             // Disable it

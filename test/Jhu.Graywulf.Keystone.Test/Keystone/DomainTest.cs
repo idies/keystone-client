@@ -21,7 +21,7 @@ namespace Jhu.Graywulf.Keystone
             domain = Client.GetDomain(domain.ID);
 
             // Rename it to something else
-            domain.Name = "test_domain2";
+            domain.Name = TestPrefix + "domain2";
             domain = Client.Update(domain);
 
             // Disable it

@@ -21,7 +21,7 @@ namespace Jhu.Graywulf.Keystone
             role = Client.GetRole(role.ID);
 
             // Rename it to something else
-            role.Name = "test_role2";
+            role.Name = TestPrefix + "role2";
             role = Client.Update(role);
 
             // Delete project
