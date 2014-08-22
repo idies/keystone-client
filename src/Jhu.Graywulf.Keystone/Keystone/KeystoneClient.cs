@@ -158,12 +158,21 @@ namespace Jhu.Graywulf.Keystone
             return res.Body.Projects;
         }
 
+        public Project[] FindProjects(string domainID, string name, bool enabledOnly, bool caseInsensitive)
+        {
+            var query = BuildSearchQueryString(domainID, name, enabledOnly, caseInsensitive);
+            var res = SendRequest<ProjectListResponse>(
+                HttpMethod.Get, "/v3/projects" + query, adminAuthToken);
+
+            return res.Body.Projects;
+        }
+
         #endregion
         #region Role manipulation
 
-        public Role Create(Role project)
+        public Role Create(Role role)
         {
-            var req = RoleRequest.CreateMessage(project);
+            var req = RoleRequest.CreateMessage(role);
             var res = SendRequest<RoleRequest, RoleResponse>(
                 HttpMethod.Post, "/v3/roles", req, adminAuthToken);
 
@@ -619,6 +628,23 @@ namespace Jhu.Graywulf.Keystone
                 HttpMethod.Get,
                 String.Format("/v3/OS-TRUST/trusts/{0}/roles", trust.ID),
                 userAuthToken);
+
+            return res.Body.Roles;
+        }
+
+        /// <summary>
+        /// Returns a list of roles within a domain matched by a pattern.
+        /// </summary>
+        /// <param name="domainID"></param>
+        /// <param name="name"></param>
+        /// <param name="enabledOnly"></param>
+        /// <param name="caseInsensitive"></param>
+        /// <returns></returns>
+        public Role[] FindRoles(string domainID, string name, bool enabledOnly, bool caseInsensitive)
+        {
+            var query = BuildSearchQueryString(domainID, name, enabledOnly, caseInsensitive);
+            var res = SendRequest<RoleListResponse>(
+                HttpMethod.Get, "/v3/roles" + query, adminAuthToken);
 
             return res.Body.Roles;
         }
